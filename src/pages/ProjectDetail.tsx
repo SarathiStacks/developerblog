@@ -1,22 +1,65 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, ExternalLink, Github, Tag } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Calendar, ExternalLink, Github, Tag, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { getProjectById } from '@/data/projects';
+import { apiService } from '@/services/api';
+import type { Project } from '@/types/project';
 import Layout from '@/components/Layout';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const project = getProjectById(Number(id));
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!project) {
+  useEffect(() => {
+    const loadProject = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const projectData = await apiService.fetchProjectById(Number(id));
+        if (projectData) {
+          setProject(projectData);
+        } else {
+          setError('Project not found');
+        }
+      } catch (err) {
+        setError('Failed to load project');
+        console.error('Error loading project:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProject();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-16">
+          <div className="flex justify-center">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading project details...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !project) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-4xl font-bold mb-4">Project Not Found</h1>
           <p className="text-muted-foreground mb-8">
-            The project you're looking for doesn't exist.
+            {error || "The project you're looking for doesn't exist."}
           </p>
           <Link to="/">
             <Button>
@@ -119,18 +162,7 @@ const ProjectDetail = () => {
             <Card className="shadow-card animate-fade-in">
               <CardContent className="p-8">
                 {project.content ? (
-                  <div 
-                    className="prose prose-gray max-w-none
-                      prose-headings:text-foreground 
-                      prose-p:text-muted-foreground 
-                      prose-a:text-primary hover:prose-a:text-primary-hover
-                      prose-code:text-primary prose-code:bg-accent prose-code:px-2 prose-code:py-1 prose-code:rounded
-                      prose-pre:bg-muted prose-pre:border prose-pre:border-border
-                      prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground"
-                    dangerouslySetInnerHTML={{ 
-                      __html: project.content.replace(/\n/g, '<br>').replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/^# (.*$)/gm, '<h1>$1</h1>').replace(/^## (.*$)/gm, '<h2>$1</h2>').replace(/^### (.*$)/gm, '<h3>$1</h3>') 
-                    }}
-                  />
+                  <MarkdownRenderer content={project.content} />
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">

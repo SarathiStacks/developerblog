@@ -1,20 +1,46 @@
-import { useState, useMemo } from 'react';
-import { ArrowRight, Code, Sparkles } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { ArrowRight, Code, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/Layout';
 import ProjectCard from '@/components/ProjectCard';
 import SearchFilter, { FilterState } from '@/components/SearchFilter';
-import { projects, getCategories } from '@/data/projects';
+import { apiService } from '@/services/api';
+import type { Project } from '@/types/project';
 
 const Index = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     category: '',
     sortBy: 'newest'
   });
+  const [categories, setCategories] = useState<string[]>([]);
 
-  const categories = getCategories();
+  // Load initial data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [projectsData, categoriesData] = await Promise.all([
+          apiService.fetchProjects(),
+          apiService.getCategories()
+        ]);
+        setProjects(projectsData);
+        setCategories(categoriesData);
+      } catch (err) {
+        setError('Failed to load projects. Please try again.');
+        console.error('Error loading data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadData();
+  }, []);
+
+  // Filter projects when filters change
   const filteredAndSortedProjects = useMemo(() => {
     let filtered = projects;
 
@@ -43,7 +69,24 @@ const Index = () => {
       default:
         return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
-  }, [filters]);
+  }, [projects, filters]);
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg inline-block mb-4">
+            <Code className="h-12 w-12 text-destructive mx-auto" />
+          </div>
+          <h2 className="text-2xl font-semibold text-foreground mb-2">Something went wrong</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -115,8 +158,18 @@ const Index = () => {
               />
             </div>
 
+            {/* Loading State */}
+            {loading && (
+              <div className="flex justify-center py-16">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+                  <p className="text-muted-foreground">Loading amazing content...</p>
+                </div>
+              </div>
+            )}
+
             {/* Projects Grid */}
-            {filteredAndSortedProjects.length > 0 ? (
+            {!loading && filteredAndSortedProjects.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredAndSortedProjects.map((project, index) => (
                   <div 
@@ -128,7 +181,10 @@ const Index = () => {
                   </div>
                 ))}
               </div>
-            ) : (
+            )}
+
+            {/* Empty State */}
+            {!loading && filteredAndSortedProjects.length === 0 && (
               <div className="text-center py-12 animate-fade-in">
                 <div className="p-4 bg-muted rounded-lg inline-block mb-4">
                   <Code className="h-12 w-12 text-muted-foreground" />

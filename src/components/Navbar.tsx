@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +18,7 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
+    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border transition-colors duration-300">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -47,22 +48,25 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button variant="default" className="bg-gradient-primary hover:shadow-hover">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-2">
+            <ThemeToggle />
+            <Button variant="gradient" size="sm">
               Contact Me
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -83,7 +87,7 @@ const Navbar = () => {
                   {item.name}
                 </Link>
               ))}
-              <Button variant="default" className="mx-4 mt-2 bg-gradient-primary">
+              <Button variant="gradient" className="mx-4 mt-2">
                 Contact Me
               </Button>
             </div>

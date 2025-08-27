@@ -3,19 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
-export interface Project {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  tags: string[];
-  date: string;
-  category: 'web' | 'mobile' | 'design' | 'blog';
-  githubUrl?: string;
-  liveUrl?: string;
-  content?: string;
-}
+import type { Project } from '@/types/project';
 
 interface ProjectCardProps {
   project: Project;
