@@ -59,9 +59,9 @@ const Index = () => {
             </div>
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
-              Creative{' '}
+              Developer{' '}
               <span className="relative">
-                Developer
+                Blog
                 <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-300 animate-pulse" />
               </span>
             </h1>

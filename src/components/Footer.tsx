@@ -41,7 +41,7 @@ const Footer = () => {
                 <Code className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Portfolio
+                DevBlog
               </span>
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
@@ -97,7 +97,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 Portfolio. All rights reserved. Built with React & Tailwind CSS.
+            © 2024 DevBlog. All rights reserved. Built with React & Tailwind CSS.
           </p>
         </div>
       </div>
